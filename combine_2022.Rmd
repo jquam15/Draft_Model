@@ -1,0 +1,58 @@
+---
+title: "combine_results"
+author: "John Quam"
+date: "11/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#load in the package
+library(nbastatR)
+library(tidyverse)
+```
+
+
+```{r}
+#get a dataframe of draft combine results from 2011 to 2022 (commented out since I don't need to run this again)
+df = draft_combines(years=2023)
+```
+
+
+
+
+```{r}
+df = df %>%
+  #select only the columns I want, with the exception of Lane Agility I should be able to find the missing data for 
+  #all the other variables if I need to (kept lane agility because I think its important)
+  select(yearCombine, namePlayer, slugPosition, heightWOShoesInches, weightLBS, wingspanInches,
+         reachStandingInches, timeLaneAgility, pctBodyFat) %>%
+  #rename the columns to more intuitive names
+  rename("Player"=namePlayer, "Position"=slugPosition, "Height"=heightWOShoesInches, "Weight"=weightLBS,
+         "Wingspan"=wingspanInches, "Standing Reach"=reachStandingInches, "Lane Agiity"=timeLaneAgility,
+         "Body Fat %"=pctBodyFat) %>%
+  #take the position listed first as the player's position
+  separate(Position, c("Position", NA))
+```
+
+
+```{r}
+df
+```
+
+
+
+```{r}
+if(file.exists("combine_measurables_2022.csv")) {
+  print("File already exists")
+} else {
+  write.csv(df, "combine_measurables_2022.csv", row.names = FALSE)
+  print("File downloaded successfully!")
+}
+
+```
+
+

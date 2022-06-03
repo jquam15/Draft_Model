@@ -1,0 +1,56 @@
+---
+title: "target_variables_r"
+author: "John Quam"
+date: "1/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(nbastatR)
+library(tidyverse)
+```
+
+
+```{r}
+#increase connection size for function to run
+Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
+##get obpm and dbpm for every player that has data from 2012 to 2022
+bref_players_stats(seasons = 2012:2022, tables = "advanced", widen=TRUE, assign_to_environment = TRUE)
+```
+
+```{r}
+advanced_stats = dataBREFPlayerAdvanced
+head(advanced_stats)
+```
+
+```{r}
+advanced_stats = advanced_stats %>%
+  #filter year since 2011 to get desired seasons and minutes >= 700 to remove small sample sizes
+  filter(yearSeason >= 2011 & minutes >= 700) %>%
+  #select only the desired variables
+  select(yearSeason, namePlayer, slugPosition, ratioOBPM, ratioDBPM) %>%
+  #rename the columns
+  rename("Year" = "yearSeason", "Player" = "namePlayer", "Position" = "slugPosition", "OBPM" = "ratioOBPM", "DBPM" = "ratioDBPM")
+```
+
+```{r}
+#inspect the last 5 rows
+tail(advanced_stats)
+```
+
+```{r}
+if(file.exists("professional_data.csv")) {
+  print("File already exists")
+} else {
+  write.csv(advanced_stats, "professional_data.csv", row.names = FALSE)
+  print("File downloaded successfully!")
+}
+```
+
+
